@@ -1,0 +1,539 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>KarmicVerse | GenAI Agent Design</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.23/jspdf.plugin.autotable.min.js"></script>
+
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #0a092d;
+            color: #e0e0e0;
+        }
+        .glass-card {
+            background: rgba(16, 15, 58, 0.6);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        .tag {
+            background-color: #3b82f6; /* blue-500 */
+            color: white;
+            padding: 2px 8px;
+            border-radius: 9999px;
+            font-size: 0.75rem;
+            font-weight: 500;
+            display: inline-block;
+            margin-left: 8px;
+        }
+        .form-section {
+            display: none;
+        }
+        .form-section.active {
+            display: block;
+        }
+        .form-input {
+            background-color: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: white;
+        }
+        .form-input::placeholder {
+            color: rgba(224, 224, 224, 0.4);
+        }
+        .form-input:focus {
+            outline: none;
+            border: 1px solid #3b82f6;
+            box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.5);
+        }
+        .btn-primary {
+            background: linear-gradient(90deg, #3b82f6, #8b5cf6);
+            transition: all 0.3s ease;
+        }
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(139, 92, 246, 0.4);
+        }
+        .btn-secondary {
+            background-color: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        .progress-bar-inner {
+            background: linear-gradient(90deg, #3b82f6, #8b5cf6);
+        }
+        /* Custom scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #0a092d;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #3b82f6;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #2563eb;
+        }
+    </style>
+</head>
+<body class="min-h-screen antialiased">
+
+    <!-- App Container -->
+    <div id="app" class="w-full min-h-screen">
+
+        <!-- Header -->
+        <header class="fixed top-0 left-0 right-0 z-50 bg-opacity-50 bg-gray-900 backdrop-blur-md border-b border-gray-800">
+            <nav class="container mx-auto px-6 py-4 flex justify-between items-center">
+                <div class="text-2xl font-bold text-white">
+                    <a href="#" onclick="showPage('home')">Karmic<span class="text-blue-400">Verse</span></a>
+                </div>
+                <div>
+                    <span id="userIdDisplay" class="text-xs text-gray-400 mr-4"></span>
+                    <button onclick="showPage('form')" class="btn-primary text-white font-semibold py-2 px-4 rounded-lg shadow-md">
+                        Build Your Agent
+                    </button>
+                </div>
+            </nav>
+        </header>
+
+        <!-- Main Content -->
+        <main class="pt-24">
+            <!-- Home Page -->
+            <div id="home-page" class="page">
+                <div class="container mx-auto px-6 py-16 text-center">
+                    <div class="max-w-4xl mx-auto">
+                        <h1 class="text-4xl md:text-6xl font-bold text-white leading-tight mb-6">
+                            Bring Your Business Agent to <span class="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-500">Digital Reality</span>
+                        </h1>
+                        <p class="text-lg md:text-xl text-gray-300 mb-10">
+                           Answer a few questions about your business, and we'll translate your needs into a powerful AI agent. From automating customer support to streamlining internal workflows, create an AI that works for you.
+                        </p>
+                        <button onclick="showPage('form')" class="btn-primary text-white font-bold py-4 px-8 rounded-lg text-lg shadow-xl">
+                            Shape Your AI Agent
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Form Page -->
+            <div id="form-page" class="page hidden">
+                <div class="container mx-auto px-4 md:px-6 py-12">
+                    <div class="max-w-4xl mx-auto glass-card rounded-2xl p-6 md:p-10 shadow-2xl">
+                        <h2 class="text-3xl font-bold text-white mb-2">GenAI Agent Design Brief</h2>
+                        <p class="text-gray-400 mb-8">Fill out the sections below to help us understand your vision.</p>
+                        
+                        <!-- Progress Bar -->
+                        <div class="w-full bg-gray-700 rounded-full h-2.5 mb-8">
+                            <div id="progress-bar" class="progress-bar-inner h-2.5 rounded-full" style="width: 0%"></div>
+                        </div>
+
+                        <form id="ai-agent-form">
+                            <!-- Sections will be injected here by JS -->
+                        </form>
+
+                        <!-- Navigation Buttons -->
+                        <div class="mt-10 flex justify-between items-center">
+                            <button id="prev-btn" class="btn-secondary text-white font-semibold py-2 px-6 rounded-lg">Previous</button>
+                            <div class="flex items-center space-x-4">
+                                <button type="button" id="save-btn" class="btn-secondary text-white font-semibold py-2 px-6 rounded-lg">Save & Continue Later</button>
+                                <button id="next-btn" class="btn-primary text-white font-semibold py-2 px-6 rounded-lg">Next</button>
+                                <button id="submit-btn" class="btn-primary text-white font-semibold py-2 px-6 rounded-lg hidden">Submit</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Thank You Page -->
+            <div id="thank-you-page" class="page hidden">
+                <div class="container mx-auto px-6 py-16 text-center">
+                    <div class="max-w-2xl mx-auto glass-card rounded-2xl p-10 shadow-2xl">
+                        <h2 class="text-4xl font-bold text-white mb-4">Thank You!</h2>
+                        <p class="text-gray-300 mb-8">Your GenAI Agent design brief has been submitted. Our team will review your submission and get back to you within 2 business days. Here's a summary of your submission.</p>
+                        <button id="download-pdf-btn" class="btn-primary text-white font-semibold py-3 px-6 rounded-lg">
+                            Download PDF Summary
+                        </button>
+                         <button onclick="showPage('home')" class="mt-4 btn-secondary text-white font-semibold py-3 px-6 rounded-lg">
+                            Back to Home
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Firebase and App Logic -->
+    <script type="module">
+        // Firebase Imports
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, doc, getDoc, setDoc, serverTimestamp, updateDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        import { setLogLevel } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        // --- CONFIGURATION ---
+        const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : { apiKey: "YOUR_API_KEY", authDomain: "...", projectId: "..." };
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-karmicverse-app';
+        
+        // --- FIREBASE INITIALIZATION ---
+        let app, auth, db;
+        let userId = null;
+        let isAuthReady = false;
+        let submissionId = null; // To track the current form session
+        let formData = {};
+
+        // --- FORM DEFINITION ---
+        const formSections = [
+            {
+                id: 'business-vision',
+                title: 'Business Vision',
+                questions: [
+                    { id: 'problem-to-solve', label: 'What problem do you want the AI Agent to solve?', type: 'textarea', stakeholder: 'Founder / Product Owner', placeholder: 'e.g., Help millennials and Gen Z users build financial literacy and automate their savings goals.' },
+                    { id: 'kpis-to-impact', label: 'What KPIs should the assistant impact?', type: 'text', stakeholder: 'Founder / Product Owner', placeholder: 'e.g., Increase user engagement by 25%, achieve a 15% monthly savings rate increase for active users.' },
+                ],
+            },
+            {
+                id: 'customer-persona',
+                title: 'Customer Persona',
+                questions: [
+                    { id: 'target-users', label: 'Who are your target users? (e.g., age, income, behavior)', type: 'textarea', stakeholder: 'Marketing / CX Lead', placeholder: 'e.g., Ages 22-35, income $50k-$120k, tech-savvy, uses mobile banking apps, often feels overwhelmed by financial planning.' },
+                    { id: 'user-pain-points', label: 'What pain points do they have in financial planning?', type: 'textarea', stakeholder: 'Marketing / CX Lead', placeholder: 'e.g., Difficulty tracking spending, uncertainty about how to start investing, student loan debt, desire to save for a house.' },
+                ],
+            },
+            {
+                id: 'interaction-style',
+                title: 'Interaction Style',
+                questions: [
+                    { id: 'agent-personality', label: 'Should the AI be formal, friendly, witty, or professional?', type: 'text', stakeholder: 'Brand Manager / UX Designer', placeholder: 'e.g., Friendly, encouraging, and professional. Like a knowledgeable mentor.' },
+                    { id: 'response-modality', label: 'Do you want text, voice, or visual responses?', type: 'text', stakeholder: 'Brand Manager / UX Designer', placeholder: 'e.g., Primarily text-based chat, with simple visual charts for spending breakdowns.' },
+                ],
+            },
+            {
+                id: 'agent-functionality',
+                title: 'Agent Functionality',
+                questions: [
+                    { id: 'agent-tasks', label: 'What specific tasks should the AI perform? (e.g., savings advice, budgeting tips)', type: 'textarea', stakeholder: 'Product Manager', placeholder: 'e.g., Analyze spending, create custom budgets, provide personalized savings tips, explain basic investment concepts (ETFs, 401k).' },
+                    { id: 'output-format', label: 'Should it provide personalized reports or just chat guidance?', type: 'text', stakeholder: 'Product Manager', placeholder: 'e.g., Interactive chat with optional weekly email summaries.' },
+                ],
+            },
+            {
+                id: 'data-availability',
+                title: 'Data Availability',
+                questions: [
+                    { id: 'customer-data', label: 'Do you have customer financial data? What format?', type: 'text', stakeholder: 'Data Engineer / CTO', placeholder: 'e.g., Yes, via Plaid integration for read-only transaction data (JSON format).' },
+                    { id: 'apis', label: 'Any APIs we can use (e.g., bank feeds, credit score)?', type: 'text', stakeholder: 'Data Engineer / CTO', placeholder: 'e.g., Plaid API for bank feeds. Potentially a credit score API in Phase 2.' },
+                ],
+            },
+            {
+                id: 'regulations-security',
+                title: 'Regulations & Security',
+                questions: [
+                    { id: 'compliance-policies', label: 'Are there data compliance policies to follow? (e.g., GLBA, GDPR)', type: 'text', stakeholder: 'Compliance Officer / CTO', placeholder: 'e.g., Must be compliant with GLBA and CCPA. All sensitive data encrypted.' },
+                    { id: 'data-anonymization', label: 'Do we need to anonymize user data before AI access?', type: 'text', stakeholder: 'Compliance Officer / CTO', placeholder: 'e.g., Yes, all PII must be anonymized using tokenization.' },
+                ],
+            },
+            {
+                id: 'integration-needs',
+                title: 'Integration Needs',
+                questions: [
+                    { id: 'agent-location', label: 'Where will this agent live? (Website, Mobile App, CRM?)', type: 'text', stakeholder: 'Developer / Product Owner', placeholder: 'e.g., Integrated into our existing iOS and Android mobile apps.' },
+                    { id: 'third-party-tools', label: 'Any third-party tools to integrate (Calendars, CRMs, Payments)?', type: 'text', stakeholder: 'Developer / Product Owner', placeholder: 'e.g., Plaid for bank data, SendGrid for email summaries.' },
+                ],
+            },
+            {
+                id: 'agent-persona',
+                title: 'Agent Persona',
+                questions: [
+                    { id: 'agent-name', label: 'What should be the name, tone, and avatar style of the assistant?', type: 'text', stakeholder: 'Brand Manager / Creative Lead', placeholder: 'e.g., Name: "Finley". Tone: Empowering and clear. Avatar: A friendly, abstract orb.' },
+                ],
+            },
+            {
+                id: 'training-material',
+                title: 'Training Material',
+                questions: [
+                    { id: 'domain-content', label: 'Do you have any training material, FAQs, guides, or domain content to ingest?', type: 'textarea', stakeholder: 'Knowledge Manager', placeholder: 'e.g., We have a library of 100+ blog posts on financial topics and internal training guides.' },
+                    { id: 'knowledge-source', label: 'Should it use real-time web access or a static knowledge base?', type: 'text', stakeholder: 'Knowledge Manager', placeholder: 'e.g., Static knowledge base from our materials, with real-time web access for market data.' },
+                ],
+            },
+            {
+                id: 'success-metrics',
+                title: 'Success Metrics',
+                questions: [
+                    { id: 'success-definition', label: 'How do you define success for the AI agent after launch?', type: 'textarea', stakeholder: 'Product Manager / CEO', placeholder: 'e.g., User retention rate > 60% after 3 months; users successfully reaching savings goals.' },
+                    { id: 'evaluation-frequency', label: 'How often should we evaluate and retrain?', type: 'text', stakeholder: 'Product Manager / CEO', placeholder: 'e.g., Monthly review of KPIs and user feedback. Bi-annual model retraining.' },
+                ],
+            },
+        ];
+
+        // --- UI & STATE MANAGEMENT ---
+        let currentSectionIndex = 0;
+        
+        const pages = document.querySelectorAll('.page');
+        window.showPage = (pageId) => {
+            pages.forEach(page => page.classList.add('hidden'));
+            document.getElementById(`${pageId}-page`).classList.remove('hidden');
+            if (pageId === 'form') {
+                renderCurrentSection();
+            }
+        };
+
+        function renderFormSections() {
+            const formContainer = document.getElementById('ai-agent-form');
+            formContainer.innerHTML = '';
+            formSections.forEach((section, index) => {
+                const sectionEl = document.createElement('div');
+                sectionEl.id = `section-${index}`;
+                sectionEl.className = 'form-section';
+                
+                let questionsHtml = `<h3 class="text-2xl font-semibold text-white border-b border-gray-700 pb-2 mb-6">${section.title}</h3>`;
+                section.questions.forEach(q => {
+                    const placeholder = q.placeholder || '';
+                    const inputHtml = q.type === 'textarea'
+                        ? `<textarea id="${q.id}" name="${q.id}" rows="4" class="w-full mt-2 p-3 rounded-md form-input" placeholder="${placeholder}"></textarea>`
+                        : `<input type="${q.type}" id="${q.id}" name="${q.id}" class="w-full mt-2 p-3 rounded-md form-input" placeholder="${placeholder}">`;
+
+                    questionsHtml += `
+                        <div class="mb-6">
+                            <label for="${q.id}" class="block text-md font-medium text-gray-300">${q.label} <span class="tag">${q.stakeholder}</span></label>
+                            ${inputHtml}
+                        </div>
+                    `;
+                });
+                sectionEl.innerHTML = questionsHtml;
+                formContainer.appendChild(sectionEl);
+            });
+        }
+
+        function renderCurrentSection() {
+            document.querySelectorAll('.form-section').forEach((section, index) => {
+                section.classList.toggle('active', index === currentSectionIndex);
+            });
+            updateProgressBar();
+            updateNavButtons();
+        }
+
+        function updateProgressBar() {
+            const progress = ((currentSectionIndex + 1) / formSections.length) * 100;
+            document.getElementById('progress-bar').style.width = `${progress}%`;
+        }
+
+        function updateNavButtons() {
+            document.getElementById('prev-btn').style.visibility = currentSectionIndex === 0 ? 'hidden' : 'visible';
+            document.getElementById('next-btn').classList.toggle('hidden', currentSectionIndex === formSections.length - 1);
+            document.getElementById('submit-btn').classList.toggle('hidden', currentSectionIndex !== formSections.length - 1);
+        }
+
+        function collectFormData() {
+            const form = document.getElementById('ai-agent-form');
+            const data = new FormData(form);
+            const newFormData = {};
+            for (let [key, value] of data.entries()) {
+                newFormData[key] = value;
+            }
+            formData = {...formData, ...newFormData};
+        }
+        
+        function populateForm() {
+            if (!formData) return;
+            for (const key in formData) {
+                const input = document.getElementById(key);
+                if (input) {
+                    input.value = formData[key];
+                }
+            }
+        }
+
+        // --- EVENT LISTENERS ---
+        document.getElementById('next-btn').addEventListener('click', () => {
+            if (currentSectionIndex < formSections.length - 1) {
+                collectFormData();
+                currentSectionIndex++;
+                renderCurrentSection();
+            }
+        });
+
+        document.getElementById('prev-btn').addEventListener('click', () => {
+            if (currentSectionIndex > 0) {
+                collectFormData();
+                currentSectionIndex--;
+                renderCurrentSection();
+            }
+        });
+        
+        document.getElementById('save-btn').addEventListener('click', async () => {
+            collectFormData();
+            if (!userId) {
+                // Using a custom modal/alert would be better in a real app
+                const customAlert = (msg) => {
+                    const alertBox = document.createElement('div');
+                    alertBox.style.cssText = 'position:fixed;top:20px;left:50%;transform:translateX(-50%);background:linear-gradient(90deg, #ef4444, #f87171);color:white;padding:1rem 2rem;border-radius:8px;z-index:1000;box-shadow:0 4px 15px rgba(0,0,0,0.2);';
+                    alertBox.textContent = msg;
+                    document.body.appendChild(alertBox);
+                    setTimeout(() => alertBox.remove(), 3000);
+                };
+                customAlert('Authentication not ready. Please wait a moment and try again.');
+                return;
+            }
+            if (!submissionId) {
+                submissionId = crypto.randomUUID();
+            }
+            
+            const saveBtn = document.getElementById('save-btn');
+            saveBtn.textContent = 'Saving...';
+            saveBtn.disabled = true;
+
+            try {
+                const docRef = doc(db, `artifacts/${appId}/users/${userId}/formSubmissions`, submissionId);
+                await setDoc(docRef, {
+                    ...formData,
+                    lastSaved: serverTimestamp(),
+                    status: 'in-progress'
+                }, { merge: true });
+                // Custom success message
+                 const customAlert = (msg) => {
+                    const alertBox = document.createElement('div');
+                    alertBox.style.cssText = 'position:fixed;top:20px;left:50%;transform:translateX(-50%);background:linear-gradient(90deg, #22c55e, #4ade80);color:white;padding:1rem 2rem;border-radius:8px;z-index:1000;box-shadow:0 4px 15px rgba(0,0,0,0.2);';
+                    alertBox.textContent = msg;
+                    document.body.appendChild(alertBox);
+                    setTimeout(() => alertBox.remove(), 3000);
+                };
+                customAlert('Progress saved successfully!');
+
+            } catch (error) {
+                console.error("Error saving data:", error);
+            } finally {
+                saveBtn.textContent = 'Save & Continue Later';
+                saveBtn.disabled = false;
+            }
+        });
+
+        document.getElementById('submit-btn').addEventListener('click', async () => {
+            collectFormData();
+            if (!userId) {
+                return;
+            }
+            if (!submissionId) {
+                submissionId = crypto.randomUUID();
+            }
+
+            const submitBtn = document.getElementById('submit-btn');
+            submitBtn.textContent = 'Submitting...';
+            submitBtn.disabled = true;
+
+            try {
+                // Save to public collection for "admin" review
+                const publicDocRef = doc(db, `artifacts/${appId}/public/data/submissions`, submissionId);
+                await setDoc(publicDocRef, {
+                    ...formData,
+                    submittedAt: serverTimestamp(),
+                    submittedBy: userId,
+                    status: 'submitted'
+                });
+                
+                // Update the private doc status to 'submitted'
+                const privateDocRef = doc(db, `artifacts/${appId}/users/${userId}/formSubmissions`, submissionId);
+                await setDoc(privateDocRef, { ...formData, status: 'submitted' }, { merge: true });
+
+
+                showPage('thank-you');
+            } catch (error) {
+                console.error("Error submitting form:", error);
+            } finally {
+                submitBtn.textContent = 'Submit';
+                submitBtn.disabled = false;
+            }
+        });
+
+        document.getElementById('download-pdf-btn').addEventListener('click', () => {
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF();
+
+            doc.setFontSize(18);
+            doc.text("KarmicVerse: GenAI Agent Design Brief", 14, 22);
+            doc.setFontSize(11);
+            doc.setTextColor(100);
+            doc.text(`Submission ID: ${submissionId}`, 14, 30);
+            
+            const tableData = [];
+            formSections.forEach(section => {
+                tableData.push([{ content: section.title, colSpan: 2, styles: { fontStyle: 'bold', fillColor: [22, 160, 133] } }]);
+                section.questions.forEach(q => {
+                    tableData.push([q.label, formData[q.id] || 'N/A']);
+                });
+            });
+
+            doc.autoTable({
+                startY: 40,
+                head: [['Question', 'Response']],
+                body: tableData,
+                theme: 'grid',
+                headStyles: { fillColor: [41, 128, 185] },
+            });
+
+            doc.save(`KarmicVerse_Brief_${submissionId.substring(0,8)}.pdf`);
+        });
+
+        // --- FIREBASE AUTH & DATA LOADING ---
+        async function initialize() {
+            try {
+                app = initializeApp(firebaseConfig);
+                db = getFirestore(app);
+                auth = getAuth(app);
+                setLogLevel('debug');
+
+                onAuthStateChanged(auth, async (user) => {
+                    if (user) {
+                        userId = user.uid;
+                        console.log("User is signed in with UID:", userId);
+                        document.getElementById('userIdDisplay').textContent = `User ID: ${userId.substring(0, 8)}...`;
+                        isAuthReady = true;
+                        await loadInProgressForm();
+                    } else {
+                        console.log("No user is signed in, signing in anonymously.");
+                        try {
+                            if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+                                await signInWithCustomToken(auth, __initial_auth_token);
+                            } else {
+                                await signInAnonymously(auth);
+                            }
+                        } catch (error) {
+                            console.error("Sign-in failed:", error);
+                        }
+                    }
+                });
+
+            } catch (error) {
+                console.error("Firebase initialization failed:", error);
+                document.body.innerHTML = '<div class="text-red-500 p-8">Error initializing the application. Please check the console.</div>';
+            }
+        }
+        
+        async function loadInProgressForm() {
+            if (!userId) return;
+            
+            // For this example, we start a new form session each time the page loads.
+            // A more advanced implementation would query Firestore for an 'in-progress' form
+            // and ask the user if they want to resume.
+            console.log("Starting a new form session.");
+            submissionId = crypto.randomUUID();
+            formData = {}; // Clear previous data
+            // We don't call populateForm() here to ensure a fresh start.
+            // If you wanted to load data, you would fetch it from Firestore here
+            // and then call populateForm().
+        }
+
+        // --- INITIALIZE APP ---
+        window.onload = () => {
+            renderFormSections();
+            showPage('home');
+            initialize();
+        };
+
+    </script>
+</body>
+</html>
