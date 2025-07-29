@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>KarmicVerse | GenAI Agent Design</title>
+    <title>KarmicVerse | GenAI Agent Design (Offline)</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -32,10 +32,10 @@
             display: inline-block;
             margin-left: 8px;
         }
-        .form-section {
+        .form-section, .page {
             display: none;
         }
-        .form-section.active {
+        .form-section.active, .page.active {
             display: block;
         }
         .form-input {
@@ -80,6 +80,9 @@
         ::-webkit-scrollbar-thumb:hover {
             background: #2563eb;
         }
+        .summary-item {
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
     </style>
 </head>
 <body class="min-h-screen antialiased">
@@ -94,7 +97,6 @@
                     <a href="#" onclick="showPage('home')">Karmic<span class="text-blue-400">Verse</span></a>
                 </div>
                 <div>
-                    <span id="userIdDisplay" class="text-xs text-gray-400 mr-4"></span>
                     <button onclick="showPage('form')" class="btn-primary text-white font-semibold py-2 px-4 rounded-lg shadow-md">
                         Build Your Agent
                     </button>
@@ -105,7 +107,7 @@
         <!-- Main Content -->
         <main class="pt-24">
             <!-- Home Page -->
-            <div id="home-page" class="page">
+            <div id="home-page" class="page active">
                 <div class="container mx-auto px-6 py-16 text-center">
                     <div class="max-w-4xl mx-auto">
                         <h1 class="text-4xl md:text-6xl font-bold text-white leading-tight mb-6">
@@ -122,13 +124,12 @@
             </div>
 
             <!-- Form Page -->
-            <div id="form-page" class="page hidden">
+            <div id="form-page" class="page">
                 <div class="container mx-auto px-4 md:px-6 py-12">
                     <div class="max-w-4xl mx-auto glass-card rounded-2xl p-6 md:p-10 shadow-2xl">
                         <h2 class="text-3xl font-bold text-white mb-2">GenAI Agent Design Brief</h2>
-                        <p class="text-gray-400 mb-8">Fill out the sections below to help us understand your vision.</p>
+                        <p class="text-gray-400 mb-8">Fill out the sections below to generate your design brief.</p>
                         
-                        <!-- Progress Bar -->
                         <div class="w-full bg-gray-700 rounded-full h-2.5 mb-8">
                             <div id="progress-bar" class="progress-bar-inner h-2.5 rounded-full" style="width: 0%"></div>
                         </div>
@@ -137,30 +138,38 @@
                             <!-- Sections will be injected here by JS -->
                         </form>
 
-                        <!-- Navigation Buttons -->
                         <div class="mt-10 flex justify-between items-center">
                             <button id="prev-btn" class="btn-secondary text-white font-semibold py-2 px-6 rounded-lg">Previous</button>
-                            <div class="flex items-center space-x-4">
-                                <button type="button" id="save-btn" class="btn-secondary text-white font-semibold py-2 px-6 rounded-lg">Save & Continue Later</button>
-                                <button id="next-btn" class="btn-primary text-white font-semibold py-2 px-6 rounded-lg">Next</button>
-                                <button id="submit-btn" class="btn-primary text-white font-semibold py-2 px-6 rounded-lg hidden">Submit</button>
-                            </div>
+                            <button id="next-btn" class="btn-primary text-white font-semibold py-2 px-6 rounded-lg">Next</button>
+                            <button id="submit-btn" class="btn-primary text-white font-semibold py-2 px-6 rounded-lg hidden">Review & Finish</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Summary Page -->
+            <div id="summary-page" class="page">
+                <div class="container mx-auto px-4 md:px-6 py-12">
+                    <div class="max-w-4xl mx-auto glass-card rounded-2xl p-6 md:p-10 shadow-2xl">
+                        <h2 class="text-3xl font-bold text-white mb-4">Review Your Brief</h2>
+                        <p class="text-gray-400 mb-8">Please review your answers below. You can go back to edit or confirm to download your PDF.</p>
+                        <div id="summary-content" class="space-y-6"></div>
+                        <div class="mt-10 flex justify-between items-center">
+                            <button id="edit-btn" class="btn-secondary text-white font-semibold py-3 px-6 rounded-lg">Go Back & Edit</button>
+                            <button id="confirm-download-btn" class="btn-primary text-white font-semibold py-3 px-6 rounded-lg">Confirm & Download PDF</button>
                         </div>
                     </div>
                 </div>
             </div>
 
             <!-- Thank You Page -->
-            <div id="thank-you-page" class="page hidden">
+            <div id="thank-you-page" class="page">
                 <div class="container mx-auto px-6 py-16 text-center">
                     <div class="max-w-2xl mx-auto glass-card rounded-2xl p-10 shadow-2xl">
-                        <h2 class="text-4xl font-bold text-white mb-4">Thank You!</h2>
-                        <p class="text-gray-300 mb-8">Your GenAI Agent design brief has been submitted. Our team will review your submission and get back to you within 2 business days. Here's a summary of your submission.</p>
-                        <button id="download-pdf-btn" class="btn-primary text-white font-semibold py-3 px-6 rounded-lg">
-                            Download PDF Summary
-                        </button>
+                        <h2 class="text-4xl font-bold text-white mb-4">Download Started!</h2>
+                        <p class="text-gray-300 mb-8">Your GenAI Agent design brief PDF has been generated and should be downloading now.</p>
                          <button onclick="showPage('home')" class="mt-4 btn-secondary text-white font-semibold py-3 px-6 rounded-lg">
-                            Back to Home
+                            Start Over
                         </button>
                     </div>
                 </div>
@@ -168,24 +177,11 @@
         </main>
     </div>
 
-    <!-- Firebase and App Logic -->
+    <!-- App Logic -->
     <script type="module">
-        // Firebase Imports
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, doc, getDoc, setDoc, serverTimestamp, updateDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
-        import { setLogLevel } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
-
         // --- CONFIGURATION ---
-        const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : { apiKey: "YOUR_API_KEY", authDomain: "...", projectId: "..." };
-        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-karmicverse-app';
-        
-        // --- FIREBASE INITIALIZATION ---
-        let app, auth, db;
-        let userId = null;
-        let isAuthReady = false;
-        let submissionId = null; // To track the current form session
         let formData = {};
+        let submissionId = null; 
 
         // --- FORM DEFINITION ---
         const formSections = [
@@ -273,10 +269,9 @@
         // --- UI & STATE MANAGEMENT ---
         let currentSectionIndex = 0;
         
-        const pages = document.querySelectorAll('.page');
         window.showPage = (pageId) => {
-            pages.forEach(page => page.classList.add('hidden'));
-            document.getElementById(`${pageId}-page`).classList.remove('hidden');
+            document.querySelectorAll('.page').forEach(page => page.classList.remove('active'));
+            document.getElementById(`${pageId}-page`).classList.add('active');
             if (pageId === 'form') {
                 renderCurrentSection();
             }
@@ -347,117 +342,40 @@
                 }
             }
         }
-
-        // --- EVENT LISTENERS ---
-        document.getElementById('next-btn').addEventListener('click', () => {
-            if (currentSectionIndex < formSections.length - 1) {
-                collectFormData();
-                currentSectionIndex++;
-                renderCurrentSection();
-            }
-        });
-
-        document.getElementById('prev-btn').addEventListener('click', () => {
-            if (currentSectionIndex > 0) {
-                collectFormData();
-                currentSectionIndex--;
-                renderCurrentSection();
-            }
-        });
         
-        document.getElementById('save-btn').addEventListener('click', async () => {
-            collectFormData();
-            if (!userId) {
-                // Using a custom modal/alert would be better in a real app
-                const customAlert = (msg) => {
-                    const alertBox = document.createElement('div');
-                    alertBox.style.cssText = 'position:fixed;top:20px;left:50%;transform:translateX(-50%);background:linear-gradient(90deg, #ef4444, #f87171);color:white;padding:1rem 2rem;border-radius:8px;z-index:1000;box-shadow:0 4px 15px rgba(0,0,0,0.2);';
-                    alertBox.textContent = msg;
-                    document.body.appendChild(alertBox);
-                    setTimeout(() => alertBox.remove(), 3000);
-                };
-                customAlert('Authentication not ready. Please wait a moment and try again.');
-                return;
-            }
-            if (!submissionId) {
-                submissionId = crypto.randomUUID();
-            }
-            
-            const saveBtn = document.getElementById('save-btn');
-            saveBtn.textContent = 'Saving...';
-            saveBtn.disabled = true;
-
-            try {
-                const docRef = doc(db, `artifacts/${appId}/users/${userId}/formSubmissions`, submissionId);
-                await setDoc(docRef, {
-                    ...formData,
-                    lastSaved: serverTimestamp(),
-                    status: 'in-progress'
-                }, { merge: true });
-                // Custom success message
-                 const customAlert = (msg) => {
-                    const alertBox = document.createElement('div');
-                    alertBox.style.cssText = 'position:fixed;top:20px;left:50%;transform:translateX(-50%);background:linear-gradient(90deg, #22c55e, #4ade80);color:white;padding:1rem 2rem;border-radius:8px;z-index:1000;box-shadow:0 4px 15px rgba(0,0,0,0.2);';
-                    alertBox.textContent = msg;
-                    document.body.appendChild(alertBox);
-                    setTimeout(() => alertBox.remove(), 3000);
-                };
-                customAlert('Progress saved successfully!');
-
-            } catch (error) {
-                console.error("Error saving data:", error);
-            } finally {
-                saveBtn.textContent = 'Save & Continue Later';
-                saveBtn.disabled = false;
-            }
-        });
-
-        document.getElementById('submit-btn').addEventListener('click', async () => {
-            collectFormData();
-            if (!userId) {
-                return;
-            }
-            if (!submissionId) {
-                submissionId = crypto.randomUUID();
-            }
-
-            const submitBtn = document.getElementById('submit-btn');
-            submitBtn.textContent = 'Submitting...';
-            submitBtn.disabled = true;
-
-            try {
-                // Save to public collection for "admin" review
-                const publicDocRef = doc(db, `artifacts/${appId}/public/data/submissions`, submissionId);
-                await setDoc(publicDocRef, {
-                    ...formData,
-                    submittedAt: serverTimestamp(),
-                    submittedBy: userId,
-                    status: 'submitted'
+        function renderSummary() {
+            const summaryContainer = document.getElementById('summary-content');
+            summaryContainer.innerHTML = '';
+            formSections.forEach(section => {
+                const sectionDiv = document.createElement('div');
+                sectionDiv.innerHTML = `<h3 class="text-xl font-semibold text-white mb-3">${section.title}</h3>`;
+                const list = document.createElement('div');
+                list.className = 'space-y-4';
+                section.questions.forEach(q => {
+                    const value = formData[q.id] || 'Not answered';
+                    const item = document.createElement('div');
+                    item.className = 'summary-item pb-3';
+                    item.innerHTML = `
+                        <p class="font-medium text-gray-300">${q.label}</p>
+                        <p class="text-blue-300 whitespace-pre-wrap">${value}</p>
+                    `;
+                    list.appendChild(item);
                 });
-                
-                // Update the private doc status to 'submitted'
-                const privateDocRef = doc(db, `artifacts/${appId}/users/${userId}/formSubmissions`, submissionId);
-                await setDoc(privateDocRef, { ...formData, status: 'submitted' }, { merge: true });
+                sectionDiv.appendChild(list);
+                summaryContainer.appendChild(sectionDiv);
+            });
+        }
 
-
-                showPage('thank-you');
-            } catch (error) {
-                console.error("Error submitting form:", error);
-            } finally {
-                submitBtn.textContent = 'Submit';
-                submitBtn.disabled = false;
-            }
-        });
-
-        document.getElementById('download-pdf-btn').addEventListener('click', () => {
+        function downloadPdf() {
             const { jsPDF } = window.jspdf;
             const doc = new jsPDF();
+            submissionId = crypto.randomUUID();
 
             doc.setFontSize(18);
             doc.text("KarmicVerse: GenAI Agent Design Brief", 14, 22);
             doc.setFontSize(11);
             doc.setTextColor(100);
-            doc.text(`Submission ID: ${submissionId}`, 14, 30);
+            doc.text(`Brief ID: ${submissionId}`, 14, 30);
             
             const tableData = [];
             formSections.forEach(section => {
@@ -476,62 +394,46 @@
             });
 
             doc.save(`KarmicVerse_Brief_${submissionId.substring(0,8)}.pdf`);
+        }
+
+        // --- EVENT LISTENERS ---
+        document.getElementById('next-btn').addEventListener('click', () => {
+            if (currentSectionIndex < formSections.length - 1) {
+                collectFormData();
+                currentSectionIndex++;
+                renderCurrentSection();
+                populateForm(); // Keep form populated when moving
+            }
         });
 
-        // --- FIREBASE AUTH & DATA LOADING ---
-        async function initialize() {
-            try {
-                app = initializeApp(firebaseConfig);
-                db = getFirestore(app);
-                auth = getAuth(app);
-                setLogLevel('debug');
-
-                onAuthStateChanged(auth, async (user) => {
-                    if (user) {
-                        userId = user.uid;
-                        console.log("User is signed in with UID:", userId);
-                        document.getElementById('userIdDisplay').textContent = `User ID: ${userId.substring(0, 8)}...`;
-                        isAuthReady = true;
-                        await loadInProgressForm();
-                    } else {
-                        console.log("No user is signed in, signing in anonymously.");
-                        try {
-                            if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
-                                await signInWithCustomToken(auth, __initial_auth_token);
-                            } else {
-                                await signInAnonymously(auth);
-                            }
-                        } catch (error) {
-                            console.error("Sign-in failed:", error);
-                        }
-                    }
-                });
-
-            } catch (error) {
-                console.error("Firebase initialization failed:", error);
-                document.body.innerHTML = '<div class="text-red-500 p-8">Error initializing the application. Please check the console.</div>';
+        document.getElementById('prev-btn').addEventListener('click', () => {
+            if (currentSectionIndex > 0) {
+                collectFormData();
+                currentSectionIndex--;
+                renderCurrentSection();
+                populateForm(); // Keep form populated when moving
             }
-        }
+        });
         
-        async function loadInProgressForm() {
-            if (!userId) return;
-            
-            // For this example, we start a new form session each time the page loads.
-            // A more advanced implementation would query Firestore for an 'in-progress' form
-            // and ask the user if they want to resume.
-            console.log("Starting a new form session.");
-            submissionId = crypto.randomUUID();
-            formData = {}; // Clear previous data
-            // We don't call populateForm() here to ensure a fresh start.
-            // If you wanted to load data, you would fetch it from Firestore here
-            // and then call populateForm().
-        }
+        document.getElementById('submit-btn').addEventListener('click', () => {
+            collectFormData();
+            renderSummary();
+            showPage('summary');
+        });
+
+        document.getElementById('edit-btn').addEventListener('click', () => {
+            showPage('form');
+        });
+
+        document.getElementById('confirm-download-btn').addEventListener('click', () => {
+            downloadPdf();
+            showPage('thank-you');
+        });
 
         // --- INITIALIZE APP ---
         window.onload = () => {
             renderFormSections();
             showPage('home');
-            initialize();
         };
 
     </script>
